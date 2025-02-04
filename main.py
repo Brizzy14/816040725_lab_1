@@ -7,11 +7,70 @@ global data
 
 # read data from file and store in global variable data
 with open('data.json') as f:
-    data = json.load(f)
-
+        data = json.load(f)
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'  # return 'Hello World' in response
+    return 'Hello, World!' # return 'Hello World' in response
 
-app.run(host='0.0.0.0', port=8080, debug=True)
+@app.route('/students')
+def get_students():
+  result = []
+  pref = request.args.get('pref') # get the parameter from url
+  if pref:  
+    for student in data: # iterate dataset
+      if student['pref'] == pref: # select only the students with a given meal preference
+        result.append(student) # add match student to the result
+    return jsonify(result) # return filtered set if parameter is supplied
+  return jsonify(data) # return entire dataset if no parameter supplied
+
+@app.route('/students/<id>')
+def get_student(id):
+  for student in data: 
+    if student['id'] == id: # filter out the students without the specified id
+      return jsonify(student)
+
+#816040725 Bryan Bajoon
+#exercise 1
+@app.route('/stats')
+def get_stats():
+
+    stats = {
+        "Fish": 0,
+        "Chicken": 0,
+        "Vegetable": 0,
+        "Computer Science (Major)": 0,
+        "Computer Science (Special)": 0,
+        "Information Technology (Major)": 0,
+        "Information Technology (Special)": 0,
+        }
+    for student in data:
+
+        pref = student.get('pref')
+        if pref in stats:
+            stats[pref] += 1
+
+        programme = student.get('programme')
+        if programme in stats:
+            stats[programme] += 1
+
+    return jsonify(stats)
+
+#exercise 2
+@app.route('/add/<int:a>/<int:b>')
+def add(a, b):
+    return jsonify(a + b)
+
+@app.route('/subtract/<int:a>/<int:b>')
+def subtract(a, b):
+    return jsonify(a - b)
+
+@app.route('/multiply/<int:a>/<int:b>')
+def multiply(a, b):
+    return jsonify(a * b)
+
+@app.route('/divide/<int:a>/<int:b>')
+def divide(a, b):
+    return jsonify(a / b)
+
+app.run(host='0.0.0.0', port=8080)
